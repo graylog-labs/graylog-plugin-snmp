@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.graylog.snmp.SnmpCommandResponder;
+import org.graylog.snmp.oid.SnmpOIDDecoder;
 import org.graylog2.plugin.LocalMetricRegistry;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
@@ -16,6 +17,7 @@ import org.graylog2.plugin.inputs.transports.Transport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.MessageDispatcherImpl;
+import org.snmp4j.SNMP4JSettings;
 import org.snmp4j.Snmp;
 import org.snmp4j.mp.MPv1;
 import org.snmp4j.mp.MPv2c;
@@ -39,6 +41,9 @@ public class SnmpTransport implements Transport {
     @AssistedInject
     public SnmpTransport(@Assisted Configuration configuration, LocalMetricRegistry localMetricRegistry) {
         this.threadPoolSize = 1;
+
+        SnmpOIDDecoder snmpOIDDecoder = new SnmpOIDDecoder();
+        SNMP4JSettings.setOIDTextFormat(snmpOIDDecoder);
     }
 
     @Override
@@ -50,7 +55,7 @@ public class SnmpTransport implements Transport {
     public void launch(MessageInput input) throws MisfireException {
         // Mostly stolen from https://github.com/javiroman/flume-snmp-source/blob/master/src/main/java/org/apache/flume/source/snmp/SNMPTrapSource.java
 
-        final UdpAddress address = new UdpAddress("127.0.0.1/1620");
+        final UdpAddress address = new UdpAddress("0.0.0.0/1620");
 
         try {
             this.transport = new DefaultUdpTransportMapping(address);
