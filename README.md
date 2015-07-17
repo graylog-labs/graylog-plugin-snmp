@@ -19,5 +19,7 @@ This project is using Maven 3 and requires Java 7 or higher. The plugin will req
 * Optional: Run `mvn jdeb:jdeb` and `mvn rpm:rpm` to create a DEB and RPM package respectively.
 * Copy generated JAR file in target directory to your Graylog plugin directory.
 * Install system packages 'snmp' and 'snmp-mibs-downloader'
+* Execute 'sudo download-mibs'
 * Copy additional MIB files to `/usr/share/mibs`
 * Restart the Graylog.
+* Send test trap `sudo snmptrap -v 2c -c public 127.0.0.1:1620 '' .1.3.6.1.4.1.5089.1.0.1 .1.3.6.1.4.1.5089.2.0.999 s "123456"`

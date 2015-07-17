@@ -10,19 +10,50 @@ import org.snmp4j.util.SimpleOIDTextFormat;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.NotDirectoryException;
 import java.text.ParseException;
 import java.util.Iterator;
 import java.util.List;
 
 public class SnmpOIDDecoder implements OIDTextFormat {
     private static final Logger LOG = LoggerFactory.getLogger(SnmpOIDDecoder.class);
-    private static MibLoader loader = loadMib(new File("/usr/share/mibs"));
+    private static MibLoader loader = new MibLoader();
 
-    private static MibLoader loadMib(File mibsDir) {
-        MibLoader loader = new MibLoader();
-        loader.addAllDirs(mibsDir);
-        File dir = new File(mibsDir.getAbsolutePath());
-        List<File> mibFiles = (List<File>) FileUtils.listFiles(dir, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+    public SnmpOIDDecoder() {
+        addMibsPath("/usr/share/mibs");
+        addMibsPath("/usr/share/snmp/mibs");
+        loadMibsFromPath("/usr/share/mibs");
+        loadMibsFromPath("/usr/share/snmp/mibs");
+    }
+
+    private void addMibsPath(String mibsPath){
+        File mibsDir;
+        try {
+            mibsDir = new File(mibsPath);
+            loader.addAllDirs(mibsDir);
+        } catch (Exception e) {
+            LOG.error("Can not add MIBs path " + mibsPath);
+        }
+    }
+
+    private void loadMibsFromPath(String mibsPath) {
+        File mibsDir;
+        try {
+            mibsDir = new File(new File(mibsPath).getAbsolutePath());
+            if (!mibsDir.isDirectory()) {
+                throw new NotDirectoryException(mibsPath);
+            }
+        } catch (Exception e) {
+            LOG.error("Can not load MIBs directory " + mibsPath);
+            return;
+        }
+
+        List<File> mibFiles = (List<File>) FileUtils.listFiles(mibsDir, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+
+        if (mibFiles.size() == 0) {
+            LOG.error("Can not find any MIB files in " + mibsPath);
+        }
+
         for (File file : mibFiles) {
             LOG.debug("Loading MIBs file: " + file.toString());
             try {
@@ -30,7 +61,6 @@ public class SnmpOIDDecoder implements OIDTextFormat {
                     loader.load(new File(file.toString()));
                 }
             } catch (IOException e) {
-                e.printStackTrace();
                 LOG.error("Error loading MIB file: " + file.toString(), e);
             } catch (MibLoaderException e) {
                 LOG.error("Error parsing MIB file: " + file.toString(), e);
@@ -42,7 +72,6 @@ public class SnmpOIDDecoder implements OIDTextFormat {
                 }
             }
         }
-        return loader;
     }
 
     public static String findMibSymbol(String oid) {
