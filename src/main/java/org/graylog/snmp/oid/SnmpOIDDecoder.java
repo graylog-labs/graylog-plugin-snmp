@@ -18,16 +18,26 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Iterator;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 public class SnmpOIDDecoder implements OIDTextFormat {
     private static final Logger LOG = LoggerFactory.getLogger(SnmpOIDDecoder.class);
 
     private final MibLoader loader = new MibLoader();
 
-    public SnmpOIDDecoder() {
+    public SnmpOIDDecoder(String customMibsPath) {
+        /* Order is important! First add all paths, then load MIBs from paths. */
         addMibsPath(loader, "/usr/share/mibs");
         addMibsPath(loader, "/usr/share/snmp/mibs");
+        if (!isNullOrEmpty(customMibsPath)) {
+            addMibsPath(loader, customMibsPath);
+        }
+
         loadMibsFromPath(loader, "/usr/share/mibs");
         loadMibsFromPath(loader, "/usr/share/snmp/mibs");
+        if (!isNullOrEmpty(customMibsPath)) {
+            loadMibsFromPath(loader, customMibsPath);
+        }
     }
 
     private static void addMibsPath(MibLoader loader, String mibsPath){
