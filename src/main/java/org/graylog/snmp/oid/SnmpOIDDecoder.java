@@ -1,6 +1,10 @@
 package org.graylog.snmp.oid;
 
-import net.percederberg.mibble.*;
+import net.percederberg.mibble.Mib;
+import net.percederberg.mibble.MibLoader;
+import net.percederberg.mibble.MibLoaderException;
+import net.percederberg.mibble.MibLoaderLog;
+import net.percederberg.mibble.MibValueSymbol;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.slf4j.Logger;
@@ -9,72 +13,77 @@ import org.snmp4j.util.OIDTextFormat;
 import org.snmp4j.util.SimpleOIDTextFormat;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.NotDirectoryException;
+import java.nio.file.Paths;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 public class SnmpOIDDecoder implements OIDTextFormat {
     private static final Logger LOG = LoggerFactory.getLogger(SnmpOIDDecoder.class);
-    private static MibLoader loader = new MibLoader();
+
+    private final MibLoader loader = new MibLoader();
 
     public SnmpOIDDecoder() {
-        addMibsPath("/usr/share/mibs");
-        addMibsPath("/usr/share/snmp/mibs");
-        loadMibsFromPath("/usr/share/mibs");
-        loadMibsFromPath("/usr/share/snmp/mibs");
+        addMibsPath(loader, "/usr/share/mibs");
+        addMibsPath(loader, "/usr/share/snmp/mibs");
+        loadMibsFromPath(loader, "/usr/share/mibs");
+        loadMibsFromPath(loader, "/usr/share/snmp/mibs");
     }
 
-    private void addMibsPath(String mibsPath){
-        File mibsDir;
+    private static void addMibsPath(MibLoader loader, String mibsPath){
         try {
-            mibsDir = new File(mibsPath);
-            loader.addAllDirs(mibsDir);
+            final File mibsDir = Paths.get(mibsPath).toAbsolutePath().toFile();
+
+            if (mibsDir.isDirectory()) {
+                loader.addAllDirs(mibsDir);
+            } else {
+                LOG.warn("Not a directory: {}", mibsDir);
+            }
         } catch (Exception e) {
             LOG.error("Can not add MIBs path " + mibsPath);
         }
     }
 
-    private void loadMibsFromPath(String mibsPath) {
-        File mibsDir;
-        try {
-            mibsDir = new File(new File(mibsPath).getAbsolutePath());
-            if (!mibsDir.isDirectory()) {
-                throw new NotDirectoryException(mibsPath);
-            }
-        } catch (Exception e) {
-            LOG.error("Can not load MIBs directory " + mibsPath);
+    private static void loadMibsFromPath(MibLoader loader, String mibsPath) {
+        final File mibsDir = Paths.get(mibsPath).toAbsolutePath().toFile();
+
+        if (!mibsDir.isDirectory()) {
+            LOG.warn("Not a directory: {}", mibsDir);
             return;
         }
 
-        List<File> mibFiles = (List<File>) FileUtils.listFiles(mibsDir, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+        final Collection<File> mibFiles = FileUtils.listFiles(mibsDir, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
 
-        if (mibFiles.size() == 0) {
-            LOG.error("Can not find any MIB files in " + mibsPath);
+        if (mibFiles.isEmpty()) {
+            LOG.warn("Can not find any MIB files in {}", mibsPath);
         }
 
         for (File file : mibFiles) {
-            LOG.debug("Loading MIBs file: " + file.toString());
+            LOG.debug("Loading MIBs file: {}", file);
             try {
-                if (new File(file.toString()).isFile()) {
-                    loader.load(new File(file.toString()));
+                if (file.isFile()) {
+                    loader.load(file);
                 }
-            } catch (IOException e) {
-                LOG.error("Error loading MIB file: " + file.toString(), e);
             } catch (MibLoaderException e) {
-                LOG.error("Error parsing MIB file: " + file.toString(), e);
+                final StringBuilder builder = new StringBuilder();
+
+                builder.append("Error parsing MIB file: " + file.toString() + "\n");
+
                 MibLoaderLog errorLog = e.getLog();
                 Iterator errorItr = errorLog.entries();
                 while (errorItr.hasNext()) {
                     MibLoaderLog.LogEntry element = (MibLoaderLog.LogEntry) errorItr.next();
-                    LOG.error(element.getMessage());
+                    builder.append(" - " + element.getMessage() + "\n");
                 }
+
+                LOG.warn(builder.toString());
+            } catch (Exception e) {
+                LOG.error("Error loading MIB file: " + file.toString(), e);
             }
         }
     }
 
-    public static String findMibSymbol(String oid) {
+    private String findMibSymbol(String oid) {
         Mib[] mibs = loader.getAllMibs();
         LOG.debug("Searching through " + String.valueOf(mibs.length) + " MIBs");
         String name = null;
@@ -89,7 +98,7 @@ public class SnmpOIDDecoder implements OIDTextFormat {
         return name;
     }
 
-    public static String formatOID(int[] value) {
+    private String formatOID(int[] value) {
         StringBuilder oid = new StringBuilder(3*value.length);
         for (int i=0; i<value.length; i++) {
             if (i != 0) {
@@ -97,13 +106,13 @@ public class SnmpOIDDecoder implements OIDTextFormat {
             }
             oid.append((value[i] & 0xFFFFFFFFL));
         }
-        LOG.error("Received OID: " + oid.toString());
+        LOG.debug("Received OID: " + oid.toString());
         return findMibSymbol(oid.toString());
     }
 
     @Override
     public String format(int[] value) {
-        return SnmpOIDDecoder.formatOID(value);
+        return formatOID(value);
     }
 
     @Override
