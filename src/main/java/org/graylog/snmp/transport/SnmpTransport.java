@@ -4,9 +4,12 @@ import com.codahale.metrics.MetricSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.graylog.snmp.SnmpCommandResponder;
+import org.graylog.snmp.oid.SnmpOIDDecoder;
 import org.graylog2.plugin.LocalMetricRegistry;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
+import org.graylog2.plugin.configuration.fields.ConfigurationField;
+import org.graylog2.plugin.configuration.fields.TextField;
 import org.graylog2.plugin.inputs.MessageInput;
 import org.graylog2.plugin.inputs.MisfireException;
 import org.graylog2.plugin.inputs.annotations.ConfigClass;
@@ -16,6 +19,7 @@ import org.graylog2.plugin.inputs.transports.Transport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.MessageDispatcherImpl;
+import org.snmp4j.SNMP4JSettings;
 import org.snmp4j.Snmp;
 import org.snmp4j.mp.MPv1;
 import org.snmp4j.mp.MPv2c;
@@ -33,12 +37,23 @@ import java.io.IOException;
 public class SnmpTransport implements Transport {
     private static final Logger LOG = LoggerFactory.getLogger(SnmpTransport.class);
 
+    private static final String CK_MIBS_PATH = "mibs_path";
+    private static final String CK_BIND_ADDRESS = "bind_address";
+    private static final String CK_PORT = "port";
+
     private final int threadPoolSize;
+    private final String bindAddress;
+    private final int port;
     private UdpTransportMapping transport;
 
     @AssistedInject
     public SnmpTransport(@Assisted Configuration configuration, LocalMetricRegistry localMetricRegistry) {
         this.threadPoolSize = 1;
+        this.bindAddress = configuration.getString(CK_BIND_ADDRESS);
+        this.port = configuration.getInt(CK_PORT);
+
+        SnmpOIDDecoder snmpOIDDecoder = new SnmpOIDDecoder(configuration.getString(CK_MIBS_PATH));
+        SNMP4JSettings.setOIDTextFormat(snmpOIDDecoder);
     }
 
     @Override
@@ -50,7 +65,7 @@ public class SnmpTransport implements Transport {
     public void launch(MessageInput input) throws MisfireException {
         // Mostly stolen from https://github.com/javiroman/flume-snmp-source/blob/master/src/main/java/org/apache/flume/source/snmp/SNMPTrapSource.java
 
-        final UdpAddress address = new UdpAddress("127.0.0.1/1620");
+        final UdpAddress address = new UdpAddress(bindAddress + "/" + port);
 
         try {
             this.transport = new DefaultUdpTransportMapping(address);
@@ -104,7 +119,22 @@ public class SnmpTransport implements Transport {
     public static class Config implements Transport.Config {
         @Override
         public ConfigurationRequest getRequestedConfiguration() {
-            return new ConfigurationRequest();
+            final ConfigurationRequest cr = new ConfigurationRequest();
+
+            cr.addField(
+                    new TextField(
+                            CK_MIBS_PATH,
+                            "MIBs Path",
+                            "",
+                            "Custom MIBs load path in addition to the system defaults: /usr/share/mibs, /usr/share/snmp/mibs",
+                            ConfigurationField.Optional.OPTIONAL
+                    )
+            );
+
+            cr.addField(ConfigurationRequest.Templates.bindAddress(CK_BIND_ADDRESS));
+            cr.addField(ConfigurationRequest.Templates.portNumber(CK_PORT, 1620));
+
+            return cr;
         }
     }
 }

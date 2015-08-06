@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.PDU;
 import org.snmp4j.asn1.BERInputStream;
+import org.snmp4j.smi.OID;
 import org.snmp4j.smi.TimeTicks;
 import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
@@ -51,7 +52,7 @@ public class SnmpCodec extends AbstractCodec {
         message.addField("request_id", pdu.getRequestID().toLong());
 
         for (final VariableBinding binding : pdu.getVariableBindings()) {
-            final String key = binding.getOid().toDottedString();
+            final String key = decodeOid(binding.getOid());
             final Variable variable = binding.getVariable();
 
             try {
@@ -88,6 +89,14 @@ public class SnmpCodec extends AbstractCodec {
         public void overrideDefaultValues(@Nonnull ConfigurationRequest cr) {
             super.overrideDefaultValues(cr);
         }
+    }
+
+    private String decodeOid(OID oid) {
+        String decodedOid = oid.toString();
+        if (decodedOid == null) {
+            decodedOid = oid.toDottedString();
+        }
+        return decodedOid;
     }
 }
 
