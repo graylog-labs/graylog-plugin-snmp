@@ -13,6 +13,13 @@
     <description>Graylog ${project.artifactId} plugin.</description>
     <url>https://www.graylog.org</url>
 
+    <scm>
+        <connection>scm:git:git@github.com:Graylog2/graylog-plugin-snmp.git</connection>
+        <developerConnection>scm:git:git@github.com:Graylog2/graylog-plugin-snmp.git</developerConnection>
+        <url>https://github.com/Graylog2/graylog-plugin-snmp</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.7</maven.compiler.source>
