@@ -6,8 +6,8 @@ addons:
   apt:
     packages:
       - rpm
-before_script:
-  - wget http://www.mibble.org/download/stable/2.9.3/mibble-2.9.3.tar.gz
+before_install:
+  - wget -q http://www.mibble.org/download/stable/2.9.3/mibble-2.9.3.tar.gz
   - tar -xzf mibble-2.9.3.tar.gz
   - mvn install:install-file -DgroupId=net.percederberg -DartifactId=mibble-parser -Dversion=2.9.3 -Dpackaging=jar -Dfile=mibble-2.9.3/lib/mibble-parser-2.9.3.jar
 before_deploy:
