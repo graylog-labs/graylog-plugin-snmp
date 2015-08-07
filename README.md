@@ -44,3 +44,15 @@ This project is using Maven 3 and requires Java 7 or higher.
 * Copy additional MIB files to `/usr/share/mibs`
 * Restart the Graylog.
 * Send test trap `sudo snmptrap -v 2c -c public 127.0.0.1:1620 '' .1.3.6.1.4.1.5089.1.0.1 .1.3.6.1.4.1.5089.2.0.999 s "123456"`
+
+## Plugin Release
+
+We are using the maven release plugin:
+
+```
+$ mvn release:prepare
+[...]
+$ mvn release:perform
+```
+
+This sets the version numbers, creates a tag and pushes to GitHub. TravisCI will build the release artifacts and upload to GitHub automatically.
