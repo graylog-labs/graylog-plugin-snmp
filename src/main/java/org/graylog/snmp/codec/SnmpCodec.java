@@ -46,7 +46,7 @@ public class SnmpCodec extends AbstractCodec {
             return null;
         }
 
-        final Message message = new Message("SNMP trap " + pdu.getRequestID().toString(), "source", rawMessage.getTimestamp());
+        final Message message = new Message("SNMP trap " + pdu.getRequestID().toString(), null, rawMessage.getTimestamp());
 
         message.addField("trap_type", pdu.getType());
         message.addField("request_id", pdu.getRequestID().toLong());
