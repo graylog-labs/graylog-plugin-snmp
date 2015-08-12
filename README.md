@@ -5,6 +5,10 @@ This plugin provides an input plugin to receive SNMP traps.
 
 **Required Graylog version:** 1.0 and later
 
+## Caveat
+
+This plugin is still pretty young and hasn't seen production traffic yet. Please [let us know](/issues) if you see any problems. Thank you!
+
 ## Installation
 
 [Download the plugin](https://github.com/Graylog2/graylog-plugin-snmp/releases)
