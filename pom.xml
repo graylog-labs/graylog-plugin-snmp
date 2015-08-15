@@ -63,6 +63,11 @@
             <artifactId>mibble-parser</artifactId>
             <version>2.9.3</version>
         </dependency>
+        <dependency>
+            <groupId>net.percederberg</groupId>
+            <artifactId>mibble-mibs</artifactId>
+            <version>2.9.3</version>
+        </dependency>
     </dependencies>
 
     <build>
