@@ -1,5 +1,9 @@
 package org.graylog.snmp;
 
+import com.google.common.collect.Iterables;
+import org.graylog.snmp.oid.SnmpMibsLoader;
+import org.graylog.snmp.oid.SnmpOIDDecoder;
+import org.graylog.snmp.oid.SnmpMibsLoaderRegistry;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.journal.RawMessage;
 import org.slf4j.Logger;
@@ -12,6 +16,7 @@ import org.snmp4j.smi.OID;
 import org.snmp4j.smi.TimeTicks;
 import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
+import org.snmp4j.util.OIDTextFormat;
 
 public class SnmpCommandResponder implements CommandResponder {
     private static final Logger LOG = LoggerFactory.getLogger(SnmpCommandResponder.class);
@@ -19,10 +24,22 @@ public class SnmpCommandResponder implements CommandResponder {
     private static final String KEY_PREFIX = "snmp_";
 
     private final RawMessage rawMessage;
+    private final OIDTextFormat oidTextFormat;
     private Message message = null;
 
-    public SnmpCommandResponder(RawMessage rawMessage) {
+    public SnmpCommandResponder(RawMessage rawMessage, SnmpMibsLoaderRegistry mibsLoaderRegistry, String mibsPath) {
         this.rawMessage = rawMessage;
+
+        final String inputId = Iterables.getLast(rawMessage.getSourceNodes()).inputId;
+        final SnmpMibsLoader mibsLoader = mibsLoaderRegistry.get(inputId);
+
+        if (mibsLoader == null) {
+            LOG.info("Initialize new SnmpMibsLoader (custom path: \"{}\")", mibsPath);
+            mibsLoaderRegistry.put(inputId, new SnmpMibsLoader(mibsPath));
+            this.oidTextFormat = new SnmpOIDDecoder(mibsLoaderRegistry.get(inputId));
+        } else {
+            this.oidTextFormat = new SnmpOIDDecoder(mibsLoader);
+        }
     }
 
     public Message getMessage() {
@@ -63,10 +80,12 @@ public class SnmpCommandResponder implements CommandResponder {
     }
 
     private String decodeOid(OID oid) {
-        String decodedOid = oid.toString();
-        if (decodedOid == null) {
-            decodedOid = oid.toDottedString();
+        final String decodedOid = oidTextFormat.formatForRoundTrip(oid.getValue());
+
+        if (decodedOid != null) {
+            return decodedOid;
         }
-        return decodedOid;
+
+        return oid.toDottedString();
     }
 }

@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.graylog.snmp.SnmpCommandResponder;
+import org.graylog.snmp.oid.SnmpMibsLoaderRegistry;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
@@ -39,9 +40,16 @@ public class SnmpCodec extends AbstractCodec {
 
     public static final String CK_MIBS_PATH = "mibs_path";
 
+    private final SnmpMibsLoaderRegistry mibsLoaderRegistry;
+    private final String mibsPath;
+
     @AssistedInject
-    protected SnmpCodec(@Assisted Configuration configuration, MetricRegistry metricRegistry) {
+    protected SnmpCodec(@Assisted Configuration configuration,
+                        MetricRegistry metricRegistry,
+                        SnmpMibsLoaderRegistry mibsLoaderRegistry) {
         super(configuration);
+        this.mibsPath = configuration.getString(CK_MIBS_PATH);
+        this.mibsLoaderRegistry = mibsLoaderRegistry;
     }
 
     @Nullable
@@ -49,7 +57,7 @@ public class SnmpCodec extends AbstractCodec {
     public Message decode(@Nonnull RawMessage rawMessage) {
         try {
             final MessageDispatcher messageDispatcher = new MessageDispatcherImpl();
-            final SnmpCommandResponder responder = new SnmpCommandResponder(rawMessage);
+            final SnmpCommandResponder responder = new SnmpCommandResponder(rawMessage, mibsLoaderRegistry, mibsPath);
 
             final USM usm = new USM(SecurityProtocols.getInstance(), new OctetString(MPv3.createLocalEngineID()), 0);
             usm.setEngineDiscoveryEnabled(true);

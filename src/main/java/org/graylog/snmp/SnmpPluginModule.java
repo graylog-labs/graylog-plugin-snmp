@@ -1,7 +1,9 @@
 package org.graylog.snmp;
 
+import com.google.inject.Scopes;
 import org.graylog.snmp.codec.SnmpCodec;
 import org.graylog.snmp.input.SnmpInput;
+import org.graylog.snmp.oid.SnmpMibsLoaderRegistry;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 
@@ -26,5 +28,7 @@ public class SnmpPluginModule extends PluginModule {
     protected void configure() {
         addMessageInput(SnmpInput.class);
         addCodec("snmp", SnmpCodec.class);
+
+        bind(SnmpMibsLoaderRegistry.class).in(Scopes.SINGLETON);
     }
 }
