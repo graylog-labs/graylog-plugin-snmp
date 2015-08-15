@@ -13,18 +13,18 @@ import org.graylog2.plugin.inputs.annotations.FactoryClass;
 
 import javax.inject.Inject;
 
-public class SnmpInput extends MessageInput {
-    private static final String NAME = "SNMP";
+public class SnmpUDPInput extends MessageInput {
+    private static final String NAME = "SNMP UDP";
 
     @AssistedInject
-    public SnmpInput(MetricRegistry metricRegistry,
-                     @Assisted Configuration configuration,
-                     UdpTransport.Factory transportFactory,
-                     LocalMetricRegistry localRegistry,
-                     SnmpCodec.Factory codecFactory,
-                     Config config,
-                     Descriptor descriptor,
-                     ServerStatus serverStatus) {
+    public SnmpUDPInput(MetricRegistry metricRegistry,
+                        @Assisted Configuration configuration,
+                        UdpTransport.Factory transportFactory,
+                        LocalMetricRegistry localRegistry,
+                        SnmpCodec.Factory codecFactory,
+                        Config config,
+                        Descriptor descriptor,
+                        ServerStatus serverStatus) {
         super(metricRegistry,
                 configuration,
                 transportFactory.create(configuration),
@@ -34,9 +34,9 @@ public class SnmpInput extends MessageInput {
     }
 
     @FactoryClass
-    public interface Factory extends MessageInput.Factory<SnmpInput> {
+    public interface Factory extends MessageInput.Factory<SnmpUDPInput> {
         @Override
-        SnmpInput create(Configuration configuration);
+        SnmpUDPInput create(Configuration configuration);
 
         @Override
         Config getConfig();
