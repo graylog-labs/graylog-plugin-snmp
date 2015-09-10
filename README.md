@@ -1,6 +1,8 @@
 SNMP Plugin for Graylog
 =======================
 
+[![Build Status](https://travis-ci.org/Graylog2/graylog-plugin-snmp.svg)](https://travis-ci.org/Graylog2/graylog-plugin-snmp)
+
 This plugin provides an input plugin to receive SNMP traps.
 
 **Required Graylog version:** 1.0 and later
