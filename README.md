@@ -5,7 +5,7 @@ SNMP Plugin for Graylog
 
 This plugin provides an input plugin to receive SNMP traps.
 
-**Required Graylog version:** 1.0 and later
+**Required Graylog version:** 2.0.0 and later
 
 ## Caveat
 
@@ -37,7 +37,7 @@ The input creation dialog allows you to configure a path to custom MIB files. Al
 
 ## Plugin Development
 
-This project is using Maven 3 and requires Java 7 or higher.
+This project is using Maven 3 and requires Java 8 or higher.
 
 * Clone this repository.
 * Download [Mibble](http://www.mibble.org/download/index.html)
@@ -62,4 +62,4 @@ $ mvn release:prepare
 $ mvn release:perform
 ```
 
-This sets the version numbers, creates a tag and pushes to GitHub. TravisCI will build the release artifacts and upload to GitHub automatically.
+This sets the version numbers, creates a tag and pushes to GitHub. Travis CI will build the release artifacts and upload to GitHub automatically.
