@@ -8,9 +8,6 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.Set;
 
-/**
- * Implement the PluginMetaData interface here.
- */
 public class SnmpPluginMetaData implements PluginMetaData {
     @Override
     public String getUniqueId() {
@@ -19,7 +16,7 @@ public class SnmpPluginMetaData implements PluginMetaData {
 
     @Override
     public String getName() {
-        return "SnmpPlugin";
+        return "SNMP Plugin";
     }
 
     @Override
@@ -44,7 +41,7 @@ public class SnmpPluginMetaData implements PluginMetaData {
 
     @Override
     public Version getRequiredVersion() {
-        return new Version(1, 0, 0);
+        return new Version(2, 0, 0);
     }
 
     @Override
