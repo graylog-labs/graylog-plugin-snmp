@@ -34,6 +34,28 @@ Now you can point your SNMP devices to the configured IP address and port to rec
 ### Custom MIBs
 
 The input creation dialog allows you to configure a path to custom MIB files. Alternatively you can also copy your custom MIB files into the `/usr/share/mibs` directory which is included by default.
+Please keep in mind that some MIBs need to be loaded with a special order. To achieve this create numbered sub-directories in your MIB load path and place the files there in the right order.
+E.g. VMWare MIBs have to be loaded in this order:
+
+```
+   VMWARE-ROOT-MIB.mib 
+   VMWARE-TC-MIB.mib 
+   VMWARE-PRODUCTS-MIB.mib 
+   VMWARE-SYSTEM-MIB.mib
+   VMWARE-ENV-MIB.mib
+   VMWARE-RESOURCES-MIB.mib
+   VMWARE-VMINFO-MIB.mib
+   ...
+```
+
+So you should create a directory structure like:
+
+```
+   /usr/share/mibs/1/VMWARE-ROOT-MIB.mib 
+   /usr/share/mibs/2/VMWARE-TC-MIB.mib 
+   /usr/share/mibs/3/VMWARE-PRODUCTS-MIB.mib
+    ...
+```
 
 ## Plugin Development
 
