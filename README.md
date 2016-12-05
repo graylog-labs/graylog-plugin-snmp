@@ -57,6 +57,10 @@ So you should create a directory structure like:
     ...
 ```
 
+## Limitations
+
+Currently only the `public` SNMP community is supported by the plugin.
+
 ## Plugin Development
 
 This project is using Maven 3 and requires Java 8 or higher.
