@@ -1,7 +1,9 @@
 SNMP Plugin for Graylog
 =======================
 
-[![Build Status](https://travis-ci.org/Graylog2/graylog-plugin-snmp.svg)](https://travis-ci.org/Graylog2/graylog-plugin-snmp)
+[![Github Downloads](https://img.shields.io/github/downloads/graylog-labs/graylog-plugin-snmp/total.svg)](https://github.com/graylog-labs/graylog-plugin-snmp/releases)
+[![GitHub Release](https://img.shields.io/github/release/graylog-labs/graylog-plugin-snmp.svg)](https://github.com/graylog-labs/graylog-plugin-snmp/releases)
+[![Build Status](https://travis-ci.org/graylog-labs/graylog-plugin-snmp.svg)](https://travis-ci.org/graylog-labs/graylog-plugin-snmp)
 
 This plugin provides an input plugin to receive SNMP traps.
 
@@ -13,7 +15,7 @@ This plugin is still pretty young and hasn't seen production traffic yet. Please
 
 ## Installation
 
-[Download the plugin](https://github.com/Graylog2/graylog-plugin-snmp/releases)
+[Download the plugin](https://github.com/graylog-labs/graylog-plugin-snmp/releases)
 and place the `.jar` file in your Graylog plugin directory. The plugin directory
 is the `plugins/` folder relative from your `graylog-server` directory by default
 and can be configured in your `graylog.conf` file.
@@ -26,7 +28,7 @@ To get a basic set of MIB files on Linux you should install the `snmp` and `snmp
 
 In the Graylog web interface, go to System/Inputs and create a new SNMP input like this:
 
-![SNMP input creation dialog](https://github.com/Graylog2/graylog-plugin-snmp/blob/master/images/snmp-input-1.png)
+![SNMP input creation dialog](images/snmp-input-1.png)
 
 Now you can point your SNMP devices to the configured IP address and port to receive SNMP traps.
 
